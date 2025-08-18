@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HalmerSuTuketim")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+241f5366a13fde16a9c280c113c58a4da80838a3")]
 [assembly: System.Reflection.AssemblyProductAttribute("HalmerSuTuketim")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HalmerSuTuketim")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
