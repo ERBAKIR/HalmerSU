@@ -1,4 +1,4 @@
-using MaterialSkin;
+ï»¿using MaterialSkin;
 using MetroFramework;
 using MySql.Data.MySqlClient;
 using System.Data;
@@ -16,6 +16,8 @@ namespace HalmerSuTuketim
 
         private void Form1Load(object sender, EventArgs e)
         {
+            bitisDateTime.Value = DateTime.Today;
+            bitisDateTime.Enabled = false; // kullanÄ±cÄ± deÄŸiÅŸtiremesin
             this.Style = MetroColorStyle.Orange;
             metroButton1.StyleManager = null;
 
@@ -37,7 +39,7 @@ namespace HalmerSuTuketim
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Veritabaný baðlantýsý baþarýsýz: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"VeritabanÃ½ baÃ°lantÃ½sÃ½ baÃ¾arÃ½sÃ½z: {ex.Message}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
 
@@ -46,22 +48,24 @@ namespace HalmerSuTuketim
         private void btnGuncelle_Click(object sender, EventArgs e)
         {
             DateTime baslangic = baslangicDateTime.Value.Date;  // 00:00:00
-            DateTime bitis = bitisDateTime.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+            //DateTime bitis = bitisDateTime.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59); Ã–NCEKKÄ° HALÄ°
+            DateTime bitis = DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
+
             decimal toplamTuketim;
 
             if (!decimal.TryParse(txtTuketim.Text, out toplamTuketim))
             {
-                MessageBox.Show("Lütfen geçerli bir sayý giriniz!",
-                                "Hatalý Giriþ",
+                MessageBox.Show("LÃ¼tfen geÃ§erli bir sayÃ½ giriniz!",
+                                "HatalÃ½ GiriÃ¾",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning);
                 return;
             }
 
-
+            
             if (bitis < baslangic)
             {
-                MessageBox.Show("Bitiþ tarihi, baþlangýç tarihinden önce olamaz!", "Tarih Hatasý", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("BitiÃ¾ tarihi, baÃ¾langÃ½Ã§ tarihinden Ã¶nce olamaz!", "Tarih HatasÃ½", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -70,7 +74,7 @@ namespace HalmerSuTuketim
                 string secilenText = selectedItem.Text;
                 string secilenValue = selectedItem.Value;
 
-                MessageBox.Show($"Seçilen: {secilenText} - {secilenValue}");
+                MessageBox.Show($"SeÃ§ilen: {secilenText} - {secilenValue}");
 
                 string query = @"
                             INSERT INTO halmer_meter_prod.meter_data_entity_log
@@ -101,7 +105,7 @@ namespace HalmerSuTuketim
                     new MySqlParameter("@endDate", MySqlDbType.DateTime) { Value = bitis }
                 );
 
-                MessageBox.Show($"{inserted} kayýt log tablosuna eklendi.");
+                MessageBox.Show($"{inserted} kayit log tablosuna eklendi.");
 
                 string sql = @"
                             WITH base AS (
@@ -135,15 +139,39 @@ namespace HalmerSuTuketim
                         new MySql.Data.MySqlClient.MySqlParameter("@toplamTuketim", MySql.Data.MySqlClient.MySqlDbType.Decimal) { Value = toplamTuketim }
                     );
 
-                    MessageBox.Show($"{affected} satýr güncellendi.", "Baþarýlý", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"{affected} satÃ½r gÃ¼ncellendi.", "BaÃ¾arÃ½lÃ½", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Güncelleme sýrasýnda hata oluþtu:\n" + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("GÃ¼ncelleme sÃ½rasÃ½nda hata oluÃ¾tu:\n" + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
+                
+                string updateLastDataSql = @"
+                                        UPDATE halmer_meter_prod.meter_entity AS me
+                                                SET me.last_data = (
+                                                                SELECT t.data FROM (
+                                                        SELECT mde.data
+                                                        FROM halmer_meter_prod.meter_data_entity AS mde
+                                                        WHERE mde.meter_entity_id = @meterId
+                                                          AND mde.created_at >= @startDate
+                                                          AND mde.created_at <= @endDate
+                                                        ORDER BY mde.created_at DESC, mde.id DESC
+                                                        LIMIT 1
+                                                    ) AS t
+                                                )
+                                                WHERE me.id = @meterId;";
+
+                int lastUpd = DbHelper.Execute(
+                    updateLastDataSql,
+                    new MySql.Data.MySqlClient.MySqlParameter("@meterId", MySql.Data.MySqlClient.MySqlDbType.VarChar) { Value = secilenValue },
+                    new MySql.Data.MySqlClient.MySqlParameter("@startDate", MySql.Data.MySqlClient.MySqlDbType.DateTime) { Value = baslangic },
+                    new MySql.Data.MySqlClient.MySqlParameter("@endDate", MySql.Data.MySqlClient.MySqlDbType.DateTime) { Value = bitis }
+                );
+
+                MessageBox.Show("Veriler gÃ¼ncellendi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            MessageBox.Show("Veriler güncellendi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //MessageBox.Show("Veriler gÃ¼ncellenemedi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 
