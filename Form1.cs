@@ -17,7 +17,7 @@ namespace HalmerSuTuketim
         private void Form1Load(object sender, EventArgs e)
         {
             bitisDateTime.Value = DateTime.Today;
-            bitisDateTime.Enabled = false; // kullanıcı değiştiremesin
+            bitisDateTime.Enabled = false;
             this.Style = MetroColorStyle.Orange;
             metroButton1.StyleManager = null;
 
@@ -47,9 +47,12 @@ namespace HalmerSuTuketim
 
         private void btnGuncelle_Click(object sender, EventArgs e)
         {
+           
             DateTime baslangic = baslangicDateTime.Value.Date;  // 00:00:00
-            //DateTime bitis = bitisDateTime.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59); ÖNCEKKİ HALİ
-            DateTime bitis = DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
+           
+            DateTime bitis = bitisDateTime.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);// ÖNCEKKİ HALİ
+            
+            //DateTime bitis = DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
 
             decimal toplamTuketim;
 
@@ -75,7 +78,7 @@ namespace HalmerSuTuketim
                 string secilenValue = selectedItem.Value;
 
                 MessageBox.Show($"Seçilen: {secilenText} - {secilenValue}");
-
+                // ilk insert log tablosuna kayıt atıcak.-- select ile çektiği veriyi
                 string query = @"
                             INSERT INTO halmer_meter_prod.meter_data_entity_log
                             (
@@ -106,7 +109,7 @@ namespace HalmerSuTuketim
                 );
 
                 MessageBox.Show($"{inserted} kayit log tablosuna eklendi.");
-
+                //gene veriyi çekip bu sefer 
                 string sql = @"
                             WITH base AS (
                                 SELECT

@@ -8,7 +8,7 @@ namespace MaterialSkin
 
         public override string ToString()
         {
-            return Text; // Combobox'ta görünen kısım
+            return Text; 
         }
     }
 }
